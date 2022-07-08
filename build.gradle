@@ -1,17 +1,17 @@
 plugins {
     id "com.gradle.plugin-publish" version "0.9.4"
     id "com.jfrog.bintray" version "1.6"
+    id 'maven-publish'
 }
 
 apply plugin: 'groovy'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'idea'
 apply plugin: 'jacoco'
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 defaultTasks 'clean', 'build'
 
@@ -38,18 +38,19 @@ task createClasspathManifest {
 }
 
 dependencies {
-    compile gradleApi()
-    compile('com.yahoo.platform.yui:yuicompressor:2.4.8') {
+    implementation gradleApi()
+    implementation('com.yahoo.platform.yui:yuicompressor:2.4.8') {
         exclude module: 'junit'
     }
-    compile 'com.asual.lesscss:lesscss-engine:1.3.3'
-    testCompile gradleTestKit()
-    testCompile files(createClasspathManifest)
-    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+    implementation 'com.asual.lesscss:lesscss-engine:1.3.3'
+    testImplementation gradleTestKit()
+    testImplementation files(createClasspathManifest)
+    testImplementation('org.spockframework:spock-junit4:2.1-M2-groovy-3.0') {
         exclude module: 'junit-dep'
         exclude module: 'groovy-all'
     }
-    testCompile 'commons-lang:commons-lang:2.6'
+    testImplementation 'commons-lang:commons-lang:2.6'
+    testImplementation 'junit:junit:4.12'
 }
 
 idea.module {
@@ -98,25 +99,7 @@ artifacts {
     archives groovydocJar, sourceJar
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            if (plugins.hasPlugin('war')) {
-                from components.web
-            } else {
-                from components.java
-            }
 
-            artifact sourceJar {
-                classifier 'sources'
-            }
-
-            artifact groovydocJar {
-                classifier 'javadoc'
-            }
-        }
-    }
-}
 
 pluginBundle {
     website = 'https://github.com/eriwen/gradle-css-plugin/'
@@ -154,6 +137,7 @@ bintray {
 }
 
 test {
+    useJUnitPlatform()
     systemProperties['version'] = version
     testLogging {
         stackTraceFilters 'truncate', 'groovy'
@@ -169,25 +153,36 @@ gradle.taskGraph.whenReady { taskGraph ->
     }
 }
 
-install.repositories.mavenInstaller {
-    pom.project(pomConfiguration)
-    if (signing.signatory) {
-        beforeDeployment { signing.signPom(it) }
-    }
-}
+publishing {
+    publications {
+        maven(MavenPublication) {
 
-uploadArchives {
-    repositories.mavenDeployer {
-        if (signing.signatory) {
-            beforeDeployment { signing.signPom(it) }
+            if (plugins.hasPlugin('war')) {
+                from components.web
+            } else {
+                from components.java
+            }
+
+            artifact sourceJar {
+                classifier 'sources'
+            }
+
+            artifact groovydocJar {
+                classifier 'javadoc'
+            }
+
+
         }
-        name = 'mavenCentralReleaseDeployer'
-        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
-            authentication(userName: System.properties['mavenCentralUsername'], password: System.properties['mavenCentralPassword'])
-            releases(updatePolicy: 'always')
-            snapshots(updatePolicy: 'always')
+
+    }
+    repositories {
+        maven{
+            credentials{
+                username= System.properties['mavenCentralUsername']
+                password= System.properties['mavenCentralPassword']
+            }
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
         }
-        pom.project(pomConfiguration)
     }
 }
 

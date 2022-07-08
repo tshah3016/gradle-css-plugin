@@ -2,13 +2,14 @@ package com.eriwen.gradle.css.util
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 abstract class FunctionalSpec extends Specification {
     @Rule
-    TemporaryFolder tempProjectDir = new TemporaryFolder()
+    TemporaryFolder tempProjectDir=new TemporaryFolder()
 
     File projectDir
     File buildFile

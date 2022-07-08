@@ -7,7 +7,11 @@ import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.internal.file.DefaultSourceDirectorySet
+import org.gradle.api.internal.file.FileCollectionFactory
 import org.gradle.api.internal.file.FileResolver
+import org.gradle.api.internal.model.DefaultObjectFactory
+import org.gradle.api.tasks.util.internal.PatternSets
+import org.gradle.api.tasks.util.internal.PatternSpecFactory
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.util.ConfigureUtil
 import org.gradle.util.GUtil
@@ -21,13 +25,13 @@ class DefaultCssSourceSet implements CssSourceSet {
     private final CssProcessingChain processing
     private final FileCollection processed
 
-    DefaultCssSourceSet(String name, Project project, Instantiator instantiator, FileResolver fileResolver) {
+    DefaultCssSourceSet(String name, Project project, Instantiator instantiator, FileResolver fileResolver,FileCollectionFactory fileCollectionFactory,DefaultObjectFactory objectFactory) {
         this.name = name
         this.displayName = GUtil.toWords(name)
-        if (GradleVersion.current().compareTo(GradleVersion.version("2.12")) >= 0) {
+        if (GradleVersion.current().compareTo(GradleVersion.version("3.0")) >= 0) {
             Class fileTreeFactory = Class.forName("org.gradle.api.internal.file.collections.DefaultDirectoryFileTreeFactory")
             def directoryFileTreeFactory = fileTreeFactory.getConstructor().newInstance()
-            this.css = new DefaultSourceDirectorySet(name, String.format("%s CSS source", displayName), fileResolver, directoryFileTreeFactory)
+            this.css = new DefaultSourceDirectorySet(name, String.format("%s CSS source", displayName), new PatternSets.PatternSetFactory(PatternSpecFactory.INSTANCE),fileCollectionFactory, directoryFileTreeFactory, objectFactory)
         } else {
             this.css = new DefaultSourceDirectorySet(name, String.format("%s CSS source", displayName), fileResolver)
         }
