@@ -108,7 +108,7 @@ pluginBundle {
     tags = ['css', 'less', 'csslint']
 
     plugins {
-        jsPlugin {
+        cssPlugin {
             id = 'com.eriwen.gradle.css'
             displayName = 'Gradle CSS Plugin'
         }
@@ -121,19 +121,6 @@ pluginBundle {
 
 signing {
     sign configurations.archives
-}
-
-bintray {
-    user = System.properties['bintrayUsername']
-    key = System.properties['bintrayApiKey']
-    publications = ['maven']
-    pkg {
-        repo = 'gradle-plugins'
-        name = 'gradle-css-plugin'
-        desc = 'Gradle plugin for working with CSS.'
-        licenses = ['Apache-2.0']
-        labels = ['gradle', 'css']
-    }
 }
 
 test {
@@ -177,11 +164,11 @@ publishing {
     }
     repositories {
         maven{
+            url "https://nexus-dfk.vuitton.net/content/groups/Gradle-Plugins/"
             credentials{
-                username= System.properties['mavenCentralUsername']
-                password= System.properties['mavenCentralPassword']
+                username 'admin_custom'
+                password '{vpz3HvmIuGMHHTqSU5vCoI9wiZLv+nvc8Wny8f1stK4=}'
             }
-            url "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
         }
     }
 }
